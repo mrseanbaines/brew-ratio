@@ -1,16 +1,11 @@
 export type MeasurementMode = "ratio" | "gramsPerLitre"
 
-export type BrewMethod =
-  | "pourOver"
-  | "frenchPress"
-  | "aeropress"
-  | "espresso"
-  | "coldBrew"
-  | "custom"
+export type BrewMethod = "pourOver" | "frenchPress" | "aeropress" | "espresso" | "coldBrew" | "custom"
 
 export interface BrewMethodConfig {
   id: BrewMethod
   name: string
+  defaultCoffee: number
   defaultRatio: number
   ratioRange: [number, number]
   preferredMode: MeasurementMode
