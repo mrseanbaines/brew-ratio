@@ -1,9 +1,16 @@
 import { useState, useCallback, useRef } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field"
 import type { BrewMethod, MeasurementMode } from "@/lib/types"
 import { BREW_METHODS } from "@/lib/constants"
 import {
@@ -14,7 +21,7 @@ import {
   gramsPerLitreToRatio,
 } from "@/lib/calculator"
 
-type Field = "coffee" | "water" | "ratio" | "gpl"
+type FieldType = "coffee" | "water" | "ratio" | "gpl"
 
 const defaultMethod = BREW_METHODS.pourOver
 
@@ -25,11 +32,10 @@ export function Calculator() {
   const [brewMethod, setBrewMethod] = useState<BrewMethod>("pourOver")
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(defaultMethod.preferredMode)
 
-  // Track which field was edited BEFORE the current one
-  const currentFieldRef = useRef<Field>("ratio")
-  const previousFieldRef = useRef<Field>("ratio")
+  const currentFieldRef = useRef<FieldType>("ratio")
+  const previousFieldRef = useRef<FieldType>("ratio")
 
-  const updateFieldTracking = (field: Field) => {
+  const updateFieldTracking = (field: FieldType) => {
     if (currentFieldRef.current !== field) {
       previousFieldRef.current = currentFieldRef.current
       currentFieldRef.current = field
@@ -42,10 +48,7 @@ export function Calculator() {
     (value: string) => {
       const coffeeValue = parseFloat(value) || 0
       setCoffee(coffeeValue)
-
       updateFieldTracking("coffee")
-
-      // If previous field was water, adjust ratio. Otherwise adjust water.
       if (previousFieldRef.current === "water") {
         setRatio(calculateRatio(coffeeValue, water))
       } else {
@@ -59,10 +62,7 @@ export function Calculator() {
     (value: string) => {
       const waterValue = parseFloat(value) || 0
       setWater(waterValue)
-
       updateFieldTracking("water")
-
-      // If previous field was coffee, adjust ratio. Otherwise adjust coffee.
       if (previousFieldRef.current === "coffee") {
         setRatio(calculateRatio(coffee, waterValue))
       } else {
@@ -76,10 +76,7 @@ export function Calculator() {
     (value: string) => {
       const ratioValue = parseFloat(value) || 0
       setRatio(ratioValue)
-
       updateFieldTracking("ratio")
-
-      // If previous field was water, adjust coffee. Otherwise adjust water.
       if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, ratioValue))
       } else {
@@ -94,10 +91,7 @@ export function Calculator() {
       const gplValue = parseFloat(value) || 0
       const newRatio = gramsPerLitreToRatio(gplValue)
       setRatio(newRatio)
-
       updateFieldTracking("gpl")
-
-      // If previous field was water, adjust coffee. Otherwise adjust water.
       if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, newRatio))
       } else {
@@ -130,90 +124,130 @@ export function Calculator() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="preset">Preset</Label>
-        <Select value={brewMethod} onValueChange={handleBrewMethodChange}>
-          <SelectTrigger id="preset" className="w-full">
-            <SelectValue>{BREW_METHODS[brewMethod].name}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(BREW_METHODS).map((method) => (
-              <SelectItem key={method.id} value={method.id}>
-                {method.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="w-full max-w-md mx-auto space-y-8">
+      <form>
+        <FieldGroup>
+          <FieldSet>
+            <FieldLegend>Settings</FieldLegend>
+            <FieldDescription>Choose how you want to measure strength.</FieldDescription>
+            <FieldGroup>
+              <Field>
+                <FieldLabel>Unit</FieldLabel>
+                <ToggleGroup
+                  value={[measurementMode]}
+                  onValueChange={handleMeasurementModeChange}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <ToggleGroupItem value="ratio" className="flex-1">
+                    Ratio
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="gramsPerLitre" className="flex-1">
+                    g/L
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                <FieldDescription>Ratio (1:16) or grams per litre (62.5 g/L).</FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="preset">Preset</FieldLabel>
+                <Select value={brewMethod} onValueChange={handleBrewMethodChange}>
+                  <SelectTrigger id="preset" className="w-full">
+                    <SelectValue>{BREW_METHODS[brewMethod].name}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(BREW_METHODS).map((method) => (
+                      <SelectItem key={method.id} value={method.id}>
+                        {method.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FieldDescription>Common brew methods with recommended ratios.</FieldDescription>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="coffee">Coffee (g)</Label>
-          <Input
-            id="coffee"
-            type="number"
-            inputMode="decimal"
-            value={coffee || ""}
-            onChange={(e) => handleCoffeeChange(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="water">Water (g)</Label>
-          <Input
-            id="water"
-            type="number"
-            inputMode="decimal"
-            value={water || ""}
-            onChange={(e) => handleWaterChange(e.target.value)}
-          />
-        </div>
-      </div>
+          <FieldSeparator />
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label>Strength</Label>
-          <ToggleGroup value={[measurementMode]} onValueChange={handleMeasurementModeChange} variant="outline">
-            <ToggleGroupItem value="ratio">Ratio</ToggleGroupItem>
-            <ToggleGroupItem value="gramsPerLitre">g/L</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-        <div className="flex items-center gap-4">
-          {measurementMode === "ratio" ? (
-            <>
-              <InputGroup className="flex-1">
-                <InputGroupInput
-                  id="ratio"
-                  type="number"
-                  inputMode="decimal"
-                  value={formatNumber(ratio)}
-                  onChange={(e) => handleRatioChange(e.target.value)}
-                />
-                <InputGroupAddon align="inline-start">
-                  <InputGroupText>1:</InputGroupText>
-                </InputGroupAddon>
-              </InputGroup>
-              <span className="text-muted-foreground text-sm">{formatNumber(gramsPerLitre)} g/L</span>
-            </>
-          ) : (
-            <>
-              <InputGroup className="flex-1">
-                <InputGroupInput
-                  id="gpl"
-                  type="number"
-                  inputMode="decimal"
-                  value={formatNumber(gramsPerLitre)}
-                  onChange={(e) => handleGplChange(e.target.value)}
-                />
-                <InputGroupAddon align="inline-end">
-                  <InputGroupText>g/L</InputGroupText>
-                </InputGroupAddon>
-              </InputGroup>
-              <span className="text-muted-foreground text-sm">1:{formatNumber(ratio)}</span>
-            </>
-          )}
-        </div>
-      </div>
+          <FieldSet>
+            <FieldLegend>Calculator</FieldLegend>
+            <FieldDescription>Enter any two values and the third will be calculated.</FieldDescription>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="coffee">Coffee</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="coffee"
+                    type="number"
+                    inputMode="decimal"
+                    value={coffee || ""}
+                    onChange={(e) => handleCoffeeChange(e.target.value)}
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupText>g</InputGroupText>
+                  </InputGroupAddon>
+                </InputGroup>
+                <FieldDescription>Dry coffee weight.</FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="water">Water</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="water"
+                    type="number"
+                    inputMode="decimal"
+                    value={water || ""}
+                    onChange={(e) => handleWaterChange(e.target.value)}
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupText>g</InputGroupText>
+                  </InputGroupAddon>
+                </InputGroup>
+                <FieldDescription>Total water weight.</FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel>Strength</FieldLabel>
+                <div className="flex items-center gap-4">
+                  {measurementMode === "ratio" ? (
+                    <>
+                      <InputGroup className="flex-1">
+                        <InputGroupInput
+                          id="ratio"
+                          type="number"
+                          inputMode="decimal"
+                          value={formatNumber(ratio)}
+                          onChange={(e) => handleRatioChange(e.target.value)}
+                        />
+                        <InputGroupAddon align="inline-start">
+                          <InputGroupText>1:</InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      <span className="text-muted-foreground text-sm">{formatNumber(gramsPerLitre)} g/L</span>
+                    </>
+                  ) : (
+                    <>
+                      <InputGroup className="flex-1">
+                        <InputGroupInput
+                          id="gpl"
+                          type="number"
+                          inputMode="decimal"
+                          value={formatNumber(gramsPerLitre)}
+                          onChange={(e) => handleGplChange(e.target.value)}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupText>g/L</InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      <span className="text-muted-foreground text-sm">1:{formatNumber(ratio)}</span>
+                    </>
+                  )}
+                </div>
+                <FieldDescription>Coffee to water ratio.</FieldDescription>
+              </Field>
+            </FieldGroup>
+          </FieldSet>
+        </FieldGroup>
+      </form>
     </div>
   )
 }
