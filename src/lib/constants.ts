@@ -4,7 +4,7 @@ export const BREW_METHODS: Record<BrewMethod, BrewMethodConfig> = {
   pourOver: {
     id: "pourOver",
     name: "Pour Over",
-    defaultCoffee: 18,
+    defaultCoffee: 16,
     defaultRatio: 16,
     ratioRange: [14, 18],
     preferredMode: "ratio",

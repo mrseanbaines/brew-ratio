@@ -130,63 +130,52 @@ export function Calculator() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-8">
-      <Select value={brewMethod} onValueChange={handleBrewMethodChange}>
-        <SelectTrigger className="w-full h-12 text-base">
-          <SelectValue>{BREW_METHODS[brewMethod].name}</SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {Object.values(BREW_METHODS).map((method) => (
-            <SelectItem key={method.id} value={method.id}>
-              {method.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className="w-full max-w-md mx-auto space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="preset">Preset</Label>
+        <Select value={brewMethod} onValueChange={handleBrewMethodChange}>
+          <SelectTrigger id="preset" className="w-full">
+            <SelectValue>{BREW_METHODS[brewMethod].name}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(BREW_METHODS).map((method) => (
+              <SelectItem key={method.id} value={method.id}>
+                {method.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="coffee" className="text-muted-foreground text-sm">
-            Coffee (g)
-          </Label>
+          <Label htmlFor="coffee">Coffee (g)</Label>
           <Input
             id="coffee"
             type="number"
             inputMode="decimal"
             value={coffee || ""}
             onChange={(e) => handleCoffeeChange(e.target.value)}
-            className="h-14 text-2xl font-light text-center"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="water" className="text-muted-foreground text-sm">
-            Water (g)
-          </Label>
+          <Label htmlFor="water">Water (g)</Label>
           <Input
             id="water"
             type="number"
             inputMode="decimal"
             value={water || ""}
             onChange={(e) => handleWaterChange(e.target.value)}
-            className="h-14 text-2xl font-light text-center"
           />
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-muted-foreground text-sm">Strength</Label>
-          <ToggleGroup
-            value={[measurementMode]}
-            onValueChange={handleMeasurementModeChange}
-            className="bg-muted rounded-lg p-1"
-          >
-            <ToggleGroupItem value="ratio" className="text-xs px-3 data-pressed:bg-background">
-              Ratio
-            </ToggleGroupItem>
-            <ToggleGroupItem value="gramsPerLitre" className="text-xs px-3 data-pressed:bg-background">
-              g/L
-            </ToggleGroupItem>
+          <Label>Strength</Label>
+          <ToggleGroup value={[measurementMode]} onValueChange={handleMeasurementModeChange} variant="outline">
+            <ToggleGroupItem value="ratio">Ratio</ToggleGroupItem>
+            <ToggleGroupItem value="gramsPerLitre">g/L</ToggleGroupItem>
           </ToggleGroup>
         </div>
         <div className="flex items-center gap-4">
@@ -199,15 +188,12 @@ export function Calculator() {
                   inputMode="decimal"
                   value={formatNumber(ratio)}
                   onChange={(e) => handleRatioChange(e.target.value)}
-                  className="h-12 text-xl font-light"
                 />
                 <InputGroupAddon align="inline-start">
                   <InputGroupText>1:</InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
-              <span className="text-muted-foreground text-sm">
-                {formatNumber(gramsPerLitre)} g/L
-              </span>
+              <span className="text-muted-foreground text-sm">{formatNumber(gramsPerLitre)} g/L</span>
             </>
           ) : (
             <>
@@ -218,15 +204,12 @@ export function Calculator() {
                   inputMode="decimal"
                   value={formatNumber(gramsPerLitre)}
                   onChange={(e) => handleGplChange(e.target.value)}
-                  className="h-12 text-xl font-light"
                 />
                 <InputGroupAddon align="inline-end">
                   <InputGroupText>g/L</InputGroupText>
                 </InputGroupAddon>
               </InputGroup>
-              <span className="text-muted-foreground text-sm">
-                1:{formatNumber(ratio)}
-              </span>
+              <span className="text-muted-foreground text-sm">1:{formatNumber(ratio)}</span>
             </>
           )}
         </div>
