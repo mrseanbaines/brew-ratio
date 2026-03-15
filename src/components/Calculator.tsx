@@ -1,10 +1,20 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { BrewMethod } from "@/lib/types"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
+import type { BrewMethod, MeasurementMode } from "@/lib/types"
 import { BREW_METHODS } from "@/lib/constants"
-import { calculateWater, calculateCoffee, ratioToGramsPerLitre, gramsPerLitreToRatio } from "@/lib/calculator"
+import {
+  calculateWater,
+  calculateCoffee,
+  calculateRatio,
+  ratioToGramsPerLitre,
+  gramsPerLitreToRatio,
+} from "@/lib/calculator"
+
+type Field = "coffee" | "water" | "ratio" | "gpl"
 
 const defaultMethod = BREW_METHODS.pourOver
 
@@ -13,7 +23,18 @@ export function Calculator() {
   const [ratio, setRatio] = useState(defaultMethod.defaultRatio)
   const [water, setWater] = useState(calculateWater(defaultMethod.defaultCoffee, defaultMethod.defaultRatio))
   const [brewMethod, setBrewMethod] = useState<BrewMethod>("pourOver")
-  const [lastEdited, setLastEdited] = useState<"coffee" | "water" | "ratio" | "gpl">("coffee")
+  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(defaultMethod.preferredMode)
+
+  // Track which field was edited BEFORE the current one
+  const currentFieldRef = useRef<Field>("ratio")
+  const previousFieldRef = useRef<Field>("ratio")
+
+  const updateFieldTracking = (field: Field) => {
+    if (currentFieldRef.current !== field) {
+      previousFieldRef.current = currentFieldRef.current
+      currentFieldRef.current = field
+    }
+  }
 
   const gramsPerLitre = ratioToGramsPerLitre(ratio)
 
@@ -21,34 +42,51 @@ export function Calculator() {
     (value: string) => {
       const coffeeValue = parseFloat(value) || 0
       setCoffee(coffeeValue)
-      setWater(calculateWater(coffeeValue, ratio))
-      setLastEdited("coffee")
+
+      updateFieldTracking("coffee")
+
+      // If previous field was water, adjust ratio. Otherwise adjust water.
+      if (previousFieldRef.current === "water") {
+        setRatio(calculateRatio(coffeeValue, water))
+      } else {
+        setWater(calculateWater(coffeeValue, ratio))
+      }
     },
-    [ratio],
+    [ratio, water],
   )
 
   const handleWaterChange = useCallback(
     (value: string) => {
       const waterValue = parseFloat(value) || 0
       setWater(waterValue)
-      setCoffee(calculateCoffee(waterValue, ratio))
-      setLastEdited("water")
+
+      updateFieldTracking("water")
+
+      // If previous field was coffee, adjust ratio. Otherwise adjust coffee.
+      if (previousFieldRef.current === "coffee") {
+        setRatio(calculateRatio(coffee, waterValue))
+      } else {
+        setCoffee(calculateCoffee(waterValue, ratio))
+      }
     },
-    [ratio],
+    [ratio, coffee],
   )
 
   const handleRatioChange = useCallback(
     (value: string) => {
       const ratioValue = parseFloat(value) || 0
       setRatio(ratioValue)
-      if (lastEdited === "water" || lastEdited === "gpl") {
+
+      updateFieldTracking("ratio")
+
+      // If previous field was water, adjust coffee. Otherwise adjust water.
+      if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, ratioValue))
       } else {
         setWater(calculateWater(coffee, ratioValue))
       }
-      setLastEdited("ratio")
     },
-    [coffee, water, lastEdited],
+    [coffee, water],
   )
 
   const handleGplChange = useCallback(
@@ -56,14 +94,17 @@ export function Calculator() {
       const gplValue = parseFloat(value) || 0
       const newRatio = gramsPerLitreToRatio(gplValue)
       setRatio(newRatio)
-      if (lastEdited === "water" || lastEdited === "ratio") {
+
+      updateFieldTracking("gpl")
+
+      // If previous field was water, adjust coffee. Otherwise adjust water.
+      if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, newRatio))
       } else {
         setWater(calculateWater(coffee, newRatio))
       }
-      setLastEdited("gpl")
     },
-    [coffee, water, lastEdited],
+    [coffee, water],
   )
 
   const handleBrewMethodChange = useCallback((value: BrewMethod | null) => {
@@ -73,6 +114,14 @@ export function Calculator() {
     setCoffee(config.defaultCoffee)
     setRatio(config.defaultRatio)
     setWater(calculateWater(config.defaultCoffee, config.defaultRatio))
+    setMeasurementMode(config.preferredMode)
+  }, [])
+
+  const handleMeasurementModeChange = useCallback((value: readonly string[]) => {
+    const mode = value[0] as MeasurementMode | undefined
+    if (mode) {
+      setMeasurementMode(mode)
+    }
   }, [])
 
   const formatNumber = (n: number) => {
@@ -124,32 +173,62 @@ export function Calculator() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="ratio" className="text-muted-foreground text-sm">
-            Ratio (1:X)
-          </Label>
-          <Input
-            id="ratio"
-            type="number"
-            inputMode="decimal"
-            value={formatNumber(ratio)}
-            onChange={(e) => handleRatioChange(e.target.value)}
-            className="h-12 text-xl font-light text-center"
-          />
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-muted-foreground text-sm">Strength</Label>
+          <ToggleGroup
+            value={[measurementMode]}
+            onValueChange={handleMeasurementModeChange}
+            className="bg-muted rounded-lg p-1"
+          >
+            <ToggleGroupItem value="ratio" className="text-xs px-3 data-pressed:bg-background">
+              Ratio
+            </ToggleGroupItem>
+            <ToggleGroupItem value="gramsPerLitre" className="text-xs px-3 data-pressed:bg-background">
+              g/L
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="gpl" className="text-muted-foreground text-sm">
-            g/L
-          </Label>
-          <Input
-            id="gpl"
-            type="number"
-            inputMode="decimal"
-            value={formatNumber(gramsPerLitre)}
-            onChange={(e) => handleGplChange(e.target.value)}
-            className="h-12 text-xl font-light text-center"
-          />
+        <div className="flex items-center gap-4">
+          {measurementMode === "ratio" ? (
+            <>
+              <InputGroup className="flex-1">
+                <InputGroupInput
+                  id="ratio"
+                  type="number"
+                  inputMode="decimal"
+                  value={formatNumber(ratio)}
+                  onChange={(e) => handleRatioChange(e.target.value)}
+                  className="h-12 text-xl font-light"
+                />
+                <InputGroupAddon align="inline-start">
+                  <InputGroupText>1:</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
+              <span className="text-muted-foreground text-sm">
+                {formatNumber(gramsPerLitre)} g/L
+              </span>
+            </>
+          ) : (
+            <>
+              <InputGroup className="flex-1">
+                <InputGroupInput
+                  id="gpl"
+                  type="number"
+                  inputMode="decimal"
+                  value={formatNumber(gramsPerLitre)}
+                  onChange={(e) => handleGplChange(e.target.value)}
+                  className="h-12 text-xl font-light"
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>g/L</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
+              <span className="text-muted-foreground text-sm">
+                1:{formatNumber(ratio)}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>
