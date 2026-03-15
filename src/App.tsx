@@ -15,7 +15,7 @@ function App() {
           <Calculator />
         </main>
 
-        <footer className="px-6 py-4 text-center text-sm text-muted-foreground">
+        <footer className="px-6 py-4 text-center text-xs text-muted-foreground font-mono">
           Built by <ExternalLink href="https://seanbaines.com">Sean Baines</ExternalLink> /{" "}
           <ExternalLink href="https://handfulcoffee.com">Handful Coffee</ExternalLink>.
         </footer>
