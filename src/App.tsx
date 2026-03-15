@@ -10,7 +10,7 @@ function App() {
           <h1 className="text-lg font-medium tracking-tight">BrewRatio</h1>
           <ThemeToggle />
         </header>
-        <main className="flex-1 flex items-start justify-center px-6 py-8">
+        <main className="flex-1 flex place-items-center px-6 py-8">
           <Calculator />
         </main>
       </div>
