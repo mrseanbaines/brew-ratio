@@ -183,6 +183,7 @@ export function Calculator() {
                     inputMode="decimal"
                     value={coffee || ""}
                     onChange={(e) => handleCoffeeChange(e.target.value)}
+                    onFocus={(e) => e.target.select()}
                   />
                   <InputGroupAddon align="inline-end">
                     <InputGroupText>g</InputGroupText>
@@ -199,6 +200,7 @@ export function Calculator() {
                     inputMode="decimal"
                     value={water || ""}
                     onChange={(e) => handleWaterChange(e.target.value)}
+                    onFocus={(e) => e.target.select()}
                   />
                   <InputGroupAddon align="inline-end">
                     <InputGroupText>g</InputGroupText>
@@ -222,6 +224,7 @@ export function Calculator() {
                         inputMode="decimal"
                         value={formatNumber(ratio)}
                         onChange={(e) => handleRatioChange(e.target.value)}
+                        onFocus={(e) => e.target.select()}
                       />
                       <InputGroupAddon align="inline-start">
                         <InputGroupText>1:</InputGroupText>
@@ -235,6 +238,7 @@ export function Calculator() {
                         inputMode="decimal"
                         value={formatNumber(gramsPerLitre)}
                         onChange={(e) => handleGplChange(e.target.value)}
+                        onFocus={(e) => e.target.select()}
                       />
                       <InputGroupAddon align="inline-end">
                         <InputGroupText>g/L</InputGroupText>
