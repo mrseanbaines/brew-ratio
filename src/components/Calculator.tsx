@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
+import { Badge } from "@/components/ui/badge"
 import {
   Field,
   FieldDescription,
@@ -206,40 +207,39 @@ export function Calculator() {
                 <FieldDescription>Total water weight.</FieldDescription>
               </Field>
               <Field>
-                <FieldLabel>Strength</FieldLabel>
+                <FieldLabel>
+                  Strength{" "}
+                  <Badge variant="default" className="ml-auto">
+                    {measurementMode === "ratio" ? `${formatNumber(gramsPerLitre)} g/L` : `1:${formatNumber(ratio)}`}
+                  </Badge>
+                </FieldLabel>
                 <div className="flex items-center gap-4">
                   {measurementMode === "ratio" ? (
-                    <>
-                      <InputGroup className="flex-1">
-                        <InputGroupInput
-                          id="ratio"
-                          type="number"
-                          inputMode="decimal"
-                          value={formatNumber(ratio)}
-                          onChange={(e) => handleRatioChange(e.target.value)}
-                        />
-                        <InputGroupAddon align="inline-start">
-                          <InputGroupText>1:</InputGroupText>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      <span className="text-muted-foreground text-sm">{formatNumber(gramsPerLitre)} g/L</span>
-                    </>
+                    <InputGroup className="flex-1">
+                      <InputGroupInput
+                        id="ratio"
+                        type="number"
+                        inputMode="decimal"
+                        value={formatNumber(ratio)}
+                        onChange={(e) => handleRatioChange(e.target.value)}
+                      />
+                      <InputGroupAddon align="inline-start">
+                        <InputGroupText>1:</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
                   ) : (
-                    <>
-                      <InputGroup className="flex-1">
-                        <InputGroupInput
-                          id="gpl"
-                          type="number"
-                          inputMode="decimal"
-                          value={formatNumber(gramsPerLitre)}
-                          onChange={(e) => handleGplChange(e.target.value)}
-                        />
-                        <InputGroupAddon align="inline-end">
-                          <InputGroupText>g/L</InputGroupText>
-                        </InputGroupAddon>
-                      </InputGroup>
-                      <span className="text-muted-foreground text-sm">1:{formatNumber(ratio)}</span>
-                    </>
+                    <InputGroup className="flex-1">
+                      <InputGroupInput
+                        id="gpl"
+                        type="number"
+                        inputMode="decimal"
+                        value={formatNumber(gramsPerLitre)}
+                        onChange={(e) => handleGplChange(e.target.value)}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>g/L</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
                   )}
                 </div>
                 <FieldDescription>Coffee to water ratio.</FieldDescription>
