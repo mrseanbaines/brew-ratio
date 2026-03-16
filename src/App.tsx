@@ -33,7 +33,7 @@ const ExternalLink = ({ href, children }: { href: string; children: React.ReactN
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="text-primary underline underline-offset-4 transition-all decoration-transparent hover:decoration-primary"
+    className="text-primary underline underline-offset-2 decoration-0 hover:decoration-1 hover:underline-offset-4 transition-all decoration-transparent hover:decoration-primary"
   >
     {children}
   </a>
