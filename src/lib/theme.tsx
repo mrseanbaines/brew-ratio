@@ -1,6 +1,22 @@
 import { createContext, useContext, useEffect, useState } from "react"
+import { z } from "zod"
 
-type Theme = "dark" | "light"
+const themeSchema = z.enum(["dark", "light"])
+type Theme = z.infer<typeof themeSchema>
+
+function loadTheme(): Theme {
+  try {
+    const stored = localStorage.getItem("theme")
+    const result = themeSchema.safeParse(stored)
+    if (result.success) {
+      return result.data
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  return "dark"
+}
 
 interface ThemeContextValue {
   theme: Theme
@@ -10,10 +26,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("theme") as Theme | null
-    return stored ?? "dark"
-  })
+  const [theme, setTheme] = useState<Theme>(loadTheme)
 
   useEffect(() => {
     const root = document.documentElement

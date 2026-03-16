@@ -21,38 +21,9 @@ import {
   ratioToGramsPerLitre,
   gramsPerLitreToRatio,
 } from "@/lib/calculator"
+import { loadSettings, saveSettings } from "@/lib/storage"
 
 type FieldType = "coffee" | "water" | "ratio" | "gpl"
-
-const STORAGE_KEY = "brewratio-settings"
-
-interface StoredSettings {
-  coffee: number
-  water: number
-  ratio: number
-  brewMethod: BrewMethod
-  measurementMode: MeasurementMode
-}
-
-function loadSettings(): StoredSettings | null {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      return JSON.parse(stored)
-    }
-  } catch {
-    // Ignore errors
-  }
-  return null
-}
-
-function saveSettings(settings: StoredSettings): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-  } catch {
-    // Ignore errors
-  }
-}
 
 const defaultMethod = BREW_METHODS.pourOver
 

@@ -1,6 +1,19 @@
-export type MeasurementMode = "ratio" | "gramsPerLitre"
+import { z } from "zod"
 
-export type BrewMethod = "pourOver" | "frenchPress" | "aeropress" | "espresso" | "coldBrew" | "custom"
+export const measurementModeSchema = z.enum(["ratio", "gramsPerLitre"])
+export type MeasurementMode = z.infer<typeof measurementModeSchema>
+
+export const brewMethodSchema = z.enum(["pourOver", "frenchPress", "aeropress", "espresso", "coldBrew", "custom"])
+export type BrewMethod = z.infer<typeof brewMethodSchema>
+
+export const storedSettingsSchema = z.object({
+  coffee: z.number().nonnegative(),
+  water: z.number().nonnegative(),
+  ratio: z.number().positive(),
+  brewMethod: brewMethodSchema,
+  measurementMode: measurementModeSchema,
+})
+export type StoredSettings = z.infer<typeof storedSettingsSchema>
 
 export interface BrewMethodConfig {
   id: BrewMethod
