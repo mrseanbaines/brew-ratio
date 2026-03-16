@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
@@ -24,14 +24,67 @@ import {
 
 type FieldType = "coffee" | "water" | "ratio" | "gpl"
 
+const STORAGE_KEY = "brewratio-settings"
+
+interface StoredSettings {
+  coffee: number
+  water: number
+  ratio: number
+  brewMethod: BrewMethod
+  measurementMode: MeasurementMode
+}
+
+function loadSettings(): StoredSettings | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch {
+    // Ignore errors
+  }
+  return null
+}
+
+function saveSettings(settings: StoredSettings): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+  } catch {
+    // Ignore errors
+  }
+}
+
 const defaultMethod = BREW_METHODS.pourOver
 
 export function Calculator() {
-  const [coffee, setCoffee] = useState(defaultMethod.defaultCoffee)
-  const [ratio, setRatio] = useState(defaultMethod.defaultRatio)
-  const [water, setWater] = useState(calculateWater(defaultMethod.defaultCoffee, defaultMethod.defaultRatio))
-  const [brewMethod, setBrewMethod] = useState<BrewMethod>("pourOver")
-  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(defaultMethod.preferredMode)
+  const [coffee, setCoffee] = useState(() => {
+    const stored = loadSettings()
+    return stored?.coffee ?? defaultMethod.defaultCoffee
+  })
+
+  const [ratio, setRatio] = useState(() => {
+    const stored = loadSettings()
+    return stored?.ratio ?? defaultMethod.defaultRatio
+  })
+
+  const [water, setWater] = useState(() => {
+    const stored = loadSettings()
+    return stored?.water ?? calculateWater(defaultMethod.defaultCoffee, defaultMethod.defaultRatio)
+  })
+
+  const [brewMethod, setBrewMethod] = useState<BrewMethod>(() => {
+    const stored = loadSettings()
+    return stored?.brewMethod ?? "pourOver"
+  })
+
+  const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(() => {
+    const stored = loadSettings()
+    return stored?.measurementMode ?? defaultMethod.preferredMode
+  })
+
+  useEffect(() => {
+    saveSettings({ coffee, water, ratio, brewMethod, measurementMode })
+  }, [coffee, water, ratio, brewMethod, measurementMode])
 
   const currentFieldRef = useRef<FieldType>("ratio")
   const previousFieldRef = useRef<FieldType>("ratio")
