@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/lib/theme"
 function App() {
   return (
     <ThemeProvider>
-      <div className="min-h-svh bg-background flex flex-col cursor-default">
+      <div className="min-h-svh bg-background flex flex-col cursor-default select-none">
         <header className="flex items-center justify-between px-6 py-4">
           <h1 className="text-lg font-medium tracking-tight">
             <span className="text-muted-foreground">Brew</span>
