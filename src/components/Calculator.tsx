@@ -130,10 +130,13 @@ export function Calculator() {
         <FieldGroup>
           <FieldSet>
             <FieldLegend>Settings</FieldLegend>
+
             <FieldDescription>Choose how you want to measure strength.</FieldDescription>
+
             <FieldGroup>
               <Field>
                 <FieldLabel>Unit</FieldLabel>
+
                 <ToggleGroup
                   value={[measurementMode]}
                   onValueChange={handleMeasurementModeChange}
@@ -143,18 +146,23 @@ export function Calculator() {
                   <ToggleGroupItem value="ratio" className="flex-1">
                     Ratio
                   </ToggleGroupItem>
+
                   <ToggleGroupItem value="gramsPerLitre" className="flex-1">
                     g/L
                   </ToggleGroupItem>
                 </ToggleGroup>
+
                 <FieldDescription>Ratio (1:16) or grams per litre (62.5 g/L).</FieldDescription>
               </Field>
+
               <Field>
                 <FieldLabel htmlFor="preset">Preset</FieldLabel>
+
                 <Select value={brewMethod} onValueChange={handleBrewMethodChange}>
                   <SelectTrigger id="preset" className="w-full">
                     <SelectValue>{BREW_METHODS[brewMethod].name}</SelectValue>
                   </SelectTrigger>
+
                   <SelectContent>
                     {Object.values(BREW_METHODS).map((method) => (
                       <SelectItem key={method.id} value={method.id}>
@@ -163,6 +171,7 @@ export function Calculator() {
                     ))}
                   </SelectContent>
                 </Select>
+
                 <FieldDescription>Common brew methods with recommended ratios.</FieldDescription>
               </Field>
             </FieldGroup>
@@ -172,10 +181,13 @@ export function Calculator() {
 
           <FieldSet>
             <FieldLegend>Calculator</FieldLegend>
+
             <FieldDescription>Enter any two values and the third will be calculated.</FieldDescription>
+
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="coffee">Coffee</FieldLabel>
+
                 <InputGroup>
                   <InputGroupInput
                     id="coffee"
@@ -185,14 +197,18 @@ export function Calculator() {
                     onChange={(e) => handleCoffeeChange(e.target.value)}
                     onFocus={(e) => e.target.select()}
                   />
+
                   <InputGroupAddon align="inline-end">
                     <InputGroupText>g</InputGroupText>
                   </InputGroupAddon>
                 </InputGroup>
+
                 <FieldDescription>Dry coffee weight.</FieldDescription>
               </Field>
+
               <Field>
                 <FieldLabel htmlFor="water">Water</FieldLabel>
+
                 <InputGroup>
                   <InputGroupInput
                     id="water"
@@ -202,12 +218,15 @@ export function Calculator() {
                     onChange={(e) => handleWaterChange(e.target.value)}
                     onFocus={(e) => e.target.select()}
                   />
+
                   <InputGroupAddon align="inline-end">
                     <InputGroupText>g</InputGroupText>
                   </InputGroupAddon>
                 </InputGroup>
+
                 <FieldDescription>Total water weight.</FieldDescription>
               </Field>
+
               <Field>
                 <FieldLabel>
                   Strength{" "}
@@ -215,6 +234,7 @@ export function Calculator() {
                     {measurementMode === "ratio" ? `${formatNumber(gramsPerLitre)} g/L` : `1:${formatNumber(ratio)}`}
                   </Badge>
                 </FieldLabel>
+
                 <div className="flex items-center gap-4">
                   {measurementMode === "ratio" ? (
                     <InputGroup className="flex-1">
@@ -226,6 +246,7 @@ export function Calculator() {
                         onChange={(e) => handleRatioChange(e.target.value)}
                         onFocus={(e) => e.target.select()}
                       />
+
                       <InputGroupAddon align="inline-start">
                         <InputGroupText>1:</InputGroupText>
                       </InputGroupAddon>
@@ -240,12 +261,14 @@ export function Calculator() {
                         onChange={(e) => handleGplChange(e.target.value)}
                         onFocus={(e) => e.target.select()}
                       />
+
                       <InputGroupAddon align="inline-end">
                         <InputGroupText>g/L</InputGroupText>
                       </InputGroupAddon>
                     </InputGroup>
                   )}
                 </div>
+
                 <FieldDescription>Coffee to water ratio.</FieldDescription>
               </Field>
             </FieldGroup>

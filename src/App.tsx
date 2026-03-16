@@ -11,6 +11,7 @@ function App() {
             <span className="text-muted-foreground">Brew</span>
             <span className="text-foreground">Ratio</span>
           </h1>
+
           <ThemeToggle />
         </header>
 
