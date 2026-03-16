@@ -3,7 +3,7 @@ import { z } from "zod"
 export const measurementModeSchema = z.enum(["ratio", "gramsPerLitre"])
 export type MeasurementMode = z.infer<typeof measurementModeSchema>
 
-export const brewMethodSchema = z.enum(["pourOver", "frenchPress", "aeropress", "espresso", "coldBrew", "custom"])
+export const brewMethodSchema = z.enum(["pourover", "frenchPress", "aeropress", "espresso", "coldBrew", "custom"])
 export type BrewMethod = z.infer<typeof brewMethodSchema>
 
 export const storedSettingsSchema = z.object({

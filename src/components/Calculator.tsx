@@ -25,7 +25,7 @@ import { loadSettings, saveSettings } from "@/lib/storage"
 
 type FieldType = "coffee" | "water" | "ratio" | "gpl"
 
-const defaultMethod = BREW_METHODS.pourOver
+const defaultMethod = BREW_METHODS.custom
 
 export function Calculator() {
   const [coffee, setCoffee] = useState(() => {
@@ -45,7 +45,7 @@ export function Calculator() {
 
   const [brewMethod, setBrewMethod] = useState<BrewMethod>(() => {
     const stored = loadSettings()
-    return stored?.brewMethod ?? "pourOver"
+    return stored?.brewMethod ?? defaultMethod.id
   })
 
   const [measurementMode, setMeasurementMode] = useState<MeasurementMode>(() => {
