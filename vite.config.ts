@@ -16,8 +16,8 @@ export default defineConfig({
         name: "BrewRatio",
         short_name: "BrewRatio",
         description: "Coffee brewing ratio calculator",
-        theme_color: "#863bff",
-        background_color: "#0a0a0a",
+        theme_color: "#0A0A0A",
+        background_color: "#0A0A0A",
         display: "standalone",
         icons: [
           {
