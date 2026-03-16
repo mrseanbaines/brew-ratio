@@ -184,7 +184,9 @@ export function Calculator() {
           <FieldSet>
             <FieldLegend>Settings</FieldLegend>
 
-            <FieldDescription>Choose how you want to measure strength.</FieldDescription>
+            <FieldDescription>
+              Choose how you want to measure strength and optionally select a preset brew method.
+            </FieldDescription>
 
             <FieldGroup>
               <Field>
