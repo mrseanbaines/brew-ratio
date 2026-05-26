@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react"
-import { Sparkles } from "lucide-react"
+import { Lock, LockOpen, Sparkles } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
+import { InputGroup, InputGroupButton, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +33,13 @@ function getDefaultRatio(config: (typeof BREW_METHODS)[keyof typeof BREW_METHODS
   return config.preferredMode === "gramsPerLitre"
     ? gramsPerLitreToRatio(config.defaultGramsPerLitre)
     : config.defaultRatio
+}
+
+function getThirdField(
+  a: "coffee" | "water" | "ratio",
+  b: "coffee" | "water" | "ratio",
+): "coffee" | "water" | "ratio" {
+  return (["coffee", "water", "ratio"] as const).find((f) => f !== a && f !== b)!
 }
 
 export function Calculator() {
@@ -71,6 +78,7 @@ export function Calculator() {
   const [flashKeys, setFlashKeys] = useState({ coffee: 0, water: 0, ratio: 0 })
   const [hasEdited, setHasEdited] = useState(false)
   const hasEditedRef = useRef(false)
+  const [lockedField, setLockedField] = useState<"coffee" | "water" | "ratio" | null>(null)
 
   const setCalculated = (field: "coffee" | "water" | "ratio") => {
     const isFirstEdit = !hasEditedRef.current
@@ -83,6 +91,10 @@ export function Calculator() {
       calculatedFieldRef.current = field
     }
     setCalculatedField(field)
+  }
+
+  const toggleLock = (field: "coffee" | "water" | "ratio") => {
+    setLockedField((prev) => (prev === field ? null : field))
   }
 
   const currentFieldRef = useRef<FieldType>("ratio")
@@ -102,7 +114,12 @@ export function Calculator() {
       const coffeeValue = parseFloat(value) || 0
       setCoffee(coffeeValue)
       updateFieldTracking("coffee")
-      if (previousFieldRef.current === "water") {
+      const calcField = lockedField
+        ? getThirdField("coffee", lockedField)
+        : previousFieldRef.current === "water"
+          ? "ratio"
+          : "water"
+      if (calcField === "ratio") {
         setRatio(calculateRatio(coffeeValue, water))
         setCalculated("ratio")
       } else {
@@ -110,7 +127,7 @@ export function Calculator() {
         setCalculated("water")
       }
     },
-    [ratio, water],
+    [ratio, water, lockedField],
   )
 
   const handleWaterChange = useCallback(
@@ -118,7 +135,12 @@ export function Calculator() {
       const waterValue = parseFloat(value) || 0
       setWater(waterValue)
       updateFieldTracking("water")
-      if (previousFieldRef.current === "coffee") {
+      const calcField = lockedField
+        ? getThirdField("water", lockedField)
+        : previousFieldRef.current === "coffee"
+          ? "ratio"
+          : "coffee"
+      if (calcField === "ratio") {
         setRatio(calculateRatio(coffee, waterValue))
         setCalculated("ratio")
       } else {
@@ -126,7 +148,7 @@ export function Calculator() {
         setCalculated("coffee")
       }
     },
-    [ratio, coffee],
+    [ratio, coffee, lockedField],
   )
 
   const handleRatioChange = useCallback(
@@ -134,7 +156,12 @@ export function Calculator() {
       const ratioValue = parseFloat(value) || 0
       setRatio(ratioValue)
       updateFieldTracking("ratio")
-      if (previousFieldRef.current === "water") {
+      const calcField = lockedField
+        ? getThirdField("ratio", lockedField)
+        : previousFieldRef.current === "water"
+          ? "coffee"
+          : "water"
+      if (calcField === "coffee") {
         setCoffee(calculateCoffee(water, ratioValue))
         setCalculated("coffee")
       } else {
@@ -142,7 +169,7 @@ export function Calculator() {
         setCalculated("water")
       }
     },
-    [coffee, water],
+    [coffee, water, lockedField],
   )
 
   const handleGplChange = useCallback(
@@ -151,7 +178,12 @@ export function Calculator() {
       const newRatio = gramsPerLitreToRatio(gplValue)
       setRatio(newRatio)
       updateFieldTracking("gpl")
-      if (previousFieldRef.current === "water") {
+      const calcField = lockedField
+        ? getThirdField("ratio", lockedField)
+        : previousFieldRef.current === "water"
+          ? "coffee"
+          : "water"
+      if (calcField === "coffee") {
         setCoffee(calculateCoffee(water, newRatio))
         setCalculated("coffee")
       } else {
@@ -159,7 +191,7 @@ export function Calculator() {
         setCalculated("water")
       }
     },
-    [coffee, water],
+    [coffee, water, lockedField],
   )
 
   const handleReset = useCallback(() => {
@@ -174,6 +206,7 @@ export function Calculator() {
     calculatedFieldRef.current = "water"
     hasEditedRef.current = false
     setHasEdited(false)
+    setLockedField(null)
   }, [])
 
   const handleBrewMethodChange = useCallback((value: BrewMethod | null) => {
@@ -277,10 +310,18 @@ export function Calculator() {
                       value={coffee || ""}
                       onChange={(e) => handleCoffeeChange(e.target.value)}
                       onFocus={(e) => e.target.select()}
+                      disabled={lockedField === "coffee"}
                     />
 
                     <InputGroupAddon align="inline-end">
                       <InputGroupText>g</InputGroupText>
+                      <InputGroupButton
+                        size="icon-xs"
+                        onClick={() => toggleLock("coffee")}
+                        aria-label={lockedField === "coffee" ? "Unlock coffee" : "Lock coffee"}
+                      >
+                        {lockedField === "coffee" ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                      </InputGroupButton>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -305,10 +346,18 @@ export function Calculator() {
                       value={water || ""}
                       onChange={(e) => handleWaterChange(e.target.value)}
                       onFocus={(e) => e.target.select()}
+                      disabled={lockedField === "water"}
                     />
 
                     <InputGroupAddon align="inline-end">
                       <InputGroupText>g</InputGroupText>
+                      <InputGroupButton
+                        size="icon-xs"
+                        onClick={() => toggleLock("water")}
+                        aria-label={lockedField === "water" ? "Unlock water" : "Lock water"}
+                      >
+                        {lockedField === "water" ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                      </InputGroupButton>
                     </InputGroupAddon>
                   </InputGroup>
 
@@ -339,10 +388,21 @@ export function Calculator() {
                         value={formatNumber(ratio)}
                         onChange={(e) => handleRatioChange(e.target.value)}
                         onFocus={(e) => e.target.select()}
+                        disabled={lockedField === "ratio"}
                       />
 
                       <InputGroupAddon align="inline-start">
                         <InputGroupText>1:</InputGroupText>
+                      </InputGroupAddon>
+
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          size="icon-xs"
+                          onClick={() => toggleLock("ratio")}
+                          aria-label={lockedField === "ratio" ? "Unlock strength" : "Lock strength"}
+                        >
+                          {lockedField === "ratio" ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                        </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>
                   ) : (
@@ -354,10 +414,18 @@ export function Calculator() {
                         value={formatNumber(gramsPerLitre)}
                         onChange={(e) => handleGplChange(e.target.value)}
                         onFocus={(e) => e.target.select()}
+                        disabled={lockedField === "ratio"}
                       />
 
                       <InputGroupAddon align="inline-end">
                         <InputGroupText>g/L</InputGroupText>
+                        <InputGroupButton
+                          size="icon-xs"
+                          onClick={() => toggleLock("ratio")}
+                          aria-label={lockedField === "ratio" ? "Unlock strength" : "Lock strength"}
+                        >
+                          {lockedField === "ratio" ? <Lock className="size-3" /> : <LockOpen className="size-3" />}
+                        </InputGroupButton>
                       </InputGroupAddon>
                     </InputGroup>
                   )}
