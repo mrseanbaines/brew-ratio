@@ -15,7 +15,7 @@ function App() {
           <ThemeToggle />
         </header>
 
-        <main className="flex-1 flex place-items-center px-6 py-8">
+        <main className="flex-1 flex place-items-center px-8 py-8">
           <Calculator />
         </main>
 

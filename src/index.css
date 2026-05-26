@@ -132,3 +132,20 @@
     @apply font-sans;
   }
 }
+
+@keyframes field-flash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px transparent;
+  }
+  25%,
+  75% {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+}
+
+.field-flash {
+  border-radius: var(--radius);
+  pointer-events: none;
+  animation: field-flash 1.5s ease-out;
+}

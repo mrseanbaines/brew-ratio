@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
+import { Sparkles } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
@@ -63,6 +64,19 @@ export function Calculator() {
     saveSettings({ coffee, water, ratio, brewMethod, measurementMode })
   }, [coffee, water, ratio, brewMethod, measurementMode])
 
+  const [calculatedField, setCalculatedField] = useState<"coffee" | "water" | "ratio">("water")
+  const calculatedFieldRef = useRef<"coffee" | "water" | "ratio">("water")
+
+  const [flashKeys, setFlashKeys] = useState({ coffee: 0, water: 0, ratio: 0 })
+
+  const setCalculated = (field: "coffee" | "water" | "ratio") => {
+    if (calculatedFieldRef.current !== field) {
+      setFlashKeys((prev) => ({ ...prev, [field]: prev[field] + 1 }))
+      calculatedFieldRef.current = field
+    }
+    setCalculatedField(field)
+  }
+
   const currentFieldRef = useRef<FieldType>("ratio")
   const previousFieldRef = useRef<FieldType>("ratio")
 
@@ -82,8 +96,10 @@ export function Calculator() {
       updateFieldTracking("coffee")
       if (previousFieldRef.current === "water") {
         setRatio(calculateRatio(coffeeValue, water))
+        setCalculated("ratio")
       } else {
         setWater(calculateWater(coffeeValue, ratio))
+        setCalculated("water")
       }
     },
     [ratio, water],
@@ -96,8 +112,10 @@ export function Calculator() {
       updateFieldTracking("water")
       if (previousFieldRef.current === "coffee") {
         setRatio(calculateRatio(coffee, waterValue))
+        setCalculated("ratio")
       } else {
         setCoffee(calculateCoffee(waterValue, ratio))
+        setCalculated("coffee")
       }
     },
     [ratio, coffee],
@@ -110,8 +128,10 @@ export function Calculator() {
       updateFieldTracking("ratio")
       if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, ratioValue))
+        setCalculated("coffee")
       } else {
         setWater(calculateWater(coffee, ratioValue))
+        setCalculated("water")
       }
     },
     [coffee, water],
@@ -125,8 +145,10 @@ export function Calculator() {
       updateFieldTracking("gpl")
       if (previousFieldRef.current === "water") {
         setCoffee(calculateCoffee(water, newRatio))
+        setCalculated("coffee")
       } else {
         setWater(calculateWater(coffee, newRatio))
+        setCalculated("water")
       }
     },
     [coffee, water],
@@ -142,6 +164,7 @@ export function Calculator() {
     setRatio(newRatio)
     setWater(calculateWater(config.defaultCoffee, newRatio))
     setMeasurementMode(config.preferredMode)
+    setCalculatedField("water")
   }, [])
 
   const handleMeasurementModeChange = useCallback((value: readonly string[]) => {
@@ -222,20 +245,27 @@ export function Calculator() {
               <Field>
                 <FieldLabel htmlFor="coffee">Coffee</FieldLabel>
 
-                <InputGroup>
-                  <InputGroupInput
-                    id="coffee"
-                    type="number"
-                    inputMode="decimal"
-                    value={coffee || ""}
-                    onChange={(e) => handleCoffeeChange(e.target.value)}
-                    onFocus={(e) => e.target.select()}
-                  />
+                <div className="relative">
+                  {flashKeys.coffee > 0 && <div key={flashKeys.coffee} className="field-flash absolute inset-0" />}
+                  <InputGroup>
+                    <InputGroupInput
+                      id="coffee"
+                      type="number"
+                      inputMode="decimal"
+                      value={coffee || ""}
+                      onChange={(e) => handleCoffeeChange(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                    />
 
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupText>g</InputGroupText>
-                  </InputGroupAddon>
-                </InputGroup>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupText>g</InputGroupText>
+                    </InputGroupAddon>
+                  </InputGroup>
+
+                  <Sparkles
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "coffee" ? "opacity-100" : "opacity-0"}`}
+                  />
+                </div>
 
                 <FieldDescription>Dry coffee weight.</FieldDescription>
               </Field>
@@ -243,20 +273,27 @@ export function Calculator() {
               <Field>
                 <FieldLabel htmlFor="water">Water</FieldLabel>
 
-                <InputGroup>
-                  <InputGroupInput
-                    id="water"
-                    type="number"
-                    inputMode="decimal"
-                    value={water || ""}
-                    onChange={(e) => handleWaterChange(e.target.value)}
-                    onFocus={(e) => e.target.select()}
-                  />
+                <div className="relative">
+                  {flashKeys.water > 0 && <div key={flashKeys.water} className="field-flash absolute inset-0" />}
+                  <InputGroup>
+                    <InputGroupInput
+                      id="water"
+                      type="number"
+                      inputMode="decimal"
+                      value={water || ""}
+                      onChange={(e) => handleWaterChange(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                    />
 
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupText>g</InputGroupText>
-                  </InputGroupAddon>
-                </InputGroup>
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupText>g</InputGroupText>
+                    </InputGroupAddon>
+                  </InputGroup>
+
+                  <Sparkles
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "water" ? "opacity-100" : "opacity-0"}`}
+                  />
+                </div>
 
                 <FieldDescription>Total water weight.</FieldDescription>
               </Field>
@@ -269,9 +306,10 @@ export function Calculator() {
                   </Badge>
                 </FieldLabel>
 
-                <div className="flex items-center gap-4">
+                <div className="relative">
+                  {flashKeys.ratio > 0 && <div key={flashKeys.ratio} className="field-flash absolute inset-0" />}
                   {measurementMode === "ratio" ? (
-                    <InputGroup className="flex-1">
+                    <InputGroup>
                       <InputGroupInput
                         id="ratio"
                         type="number"
@@ -286,7 +324,7 @@ export function Calculator() {
                       </InputGroupAddon>
                     </InputGroup>
                   ) : (
-                    <InputGroup className="flex-1">
+                    <InputGroup>
                       <InputGroupInput
                         id="gpl"
                         type="number"
@@ -301,6 +339,10 @@ export function Calculator() {
                       </InputGroupAddon>
                     </InputGroup>
                   )}
+
+                  <Sparkles
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "ratio" ? "opacity-100" : "opacity-0"}`}
+                  />
                 </div>
 
                 <FieldDescription>Coffee to water ratio.</FieldDescription>
