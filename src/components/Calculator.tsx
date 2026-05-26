@@ -2,7 +2,13 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { Lock, LockOpen, Sparkles } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { InputGroup, InputGroupButton, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
+import {
+  InputGroup,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupText,
+} from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,10 +41,7 @@ function getDefaultRatio(config: (typeof BREW_METHODS)[keyof typeof BREW_METHODS
     : config.defaultRatio
 }
 
-function getThirdField(
-  a: "coffee" | "water" | "ratio",
-  b: "coffee" | "water" | "ratio",
-): "coffee" | "water" | "ratio" {
+function getThirdField(a: "coffee" | "water" | "ratio", b: "coffee" | "water" | "ratio"): "coffee" | "water" | "ratio" {
   return (["coffee", "water", "ratio"] as const).find((f) => f !== a && f !== b)!
 }
 
