@@ -30,3 +30,11 @@ export function saveSettings(settings: StoredSettings): void {
     // Ignore errors
   }
 }
+
+export function clearSettings(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Ignore errors
+  }
+}

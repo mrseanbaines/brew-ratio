@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
@@ -22,7 +23,7 @@ import {
   ratioToGramsPerLitre,
   gramsPerLitreToRatio,
 } from "@/lib/calculator"
-import { loadSettings, saveSettings } from "@/lib/storage"
+import { loadSettings, saveSettings, clearSettings } from "@/lib/storage"
 
 type FieldType = "coffee" | "water" | "ratio" | "gpl"
 
@@ -68,9 +69,16 @@ export function Calculator() {
   const calculatedFieldRef = useRef<"coffee" | "water" | "ratio">("water")
 
   const [flashKeys, setFlashKeys] = useState({ coffee: 0, water: 0, ratio: 0 })
+  const [hasEdited, setHasEdited] = useState(false)
+  const hasEditedRef = useRef(false)
 
   const setCalculated = (field: "coffee" | "water" | "ratio") => {
-    if (calculatedFieldRef.current !== field) {
+    const isFirstEdit = !hasEditedRef.current
+    if (isFirstEdit) {
+      hasEditedRef.current = true
+      setHasEdited(true)
+    }
+    if (isFirstEdit || calculatedFieldRef.current !== field) {
       setFlashKeys((prev) => ({ ...prev, [field]: prev[field] + 1 }))
       calculatedFieldRef.current = field
     }
@@ -153,6 +161,20 @@ export function Calculator() {
     },
     [coffee, water],
   )
+
+  const handleReset = useCallback(() => {
+    clearSettings()
+    const defaultRatio = getDefaultRatio(defaultMethod)
+    setCoffee(defaultMethod.defaultCoffee)
+    setRatio(defaultRatio)
+    setWater(calculateWater(defaultMethod.defaultCoffee, defaultRatio))
+    setBrewMethod(defaultMethod.id)
+    setMeasurementMode(defaultMethod.preferredMode)
+    setCalculatedField("water")
+    calculatedFieldRef.current = "water"
+    hasEditedRef.current = false
+    setHasEdited(false)
+  }, [])
 
   const handleBrewMethodChange = useCallback((value: BrewMethod | null) => {
     if (!value) return
@@ -263,7 +285,7 @@ export function Calculator() {
                   </InputGroup>
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "coffee" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "coffee" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
@@ -291,7 +313,7 @@ export function Calculator() {
                   </InputGroup>
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "water" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "water" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
@@ -341,7 +363,7 @@ export function Calculator() {
                   )}
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-muted-foreground transition-opacity ${calculatedField === "ratio" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "ratio" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
@@ -349,6 +371,12 @@ export function Calculator() {
               </Field>
             </FieldGroup>
           </FieldSet>
+
+          <FieldSeparator />
+
+          <Button variant="outline" size="sm" type="button" onClick={handleReset}>
+            Reset to defaults
+          </Button>
         </FieldGroup>
       </form>
     </div>
