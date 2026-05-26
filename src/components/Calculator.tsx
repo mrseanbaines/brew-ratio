@@ -20,7 +20,7 @@ import {
   FieldSeparator,
   FieldSet,
 } from "@/components/ui/field"
-import type { BrewMethod, MeasurementMode } from "@/lib/types"
+import type { BrewMethod, CalcField, MeasurementMode } from "@/lib/types"
 import { BREW_METHODS } from "@/lib/constants"
 import {
   calculateWater,
@@ -31,8 +31,6 @@ import {
 } from "@/lib/calculator"
 import { loadSettings, saveSettings, clearSettings } from "@/lib/storage"
 
-type FieldType = "coffee" | "water" | "ratio" | "gpl"
-
 const defaultMethod = BREW_METHODS.custom
 
 function getDefaultRatio(config: (typeof BREW_METHODS)[keyof typeof BREW_METHODS]): number {
@@ -41,7 +39,7 @@ function getDefaultRatio(config: (typeof BREW_METHODS)[keyof typeof BREW_METHODS
     : config.defaultRatio
 }
 
-function getThirdField(a: "coffee" | "water" | "ratio", b: "coffee" | "water" | "ratio"): "coffee" | "water" | "ratio" {
+function getThirdField(a: CalcField, b: CalcField): CalcField {
   return (["coffee", "water", "ratio"] as const).find((f) => f !== a && f !== b)!
 }
 
@@ -75,15 +73,15 @@ export function Calculator() {
     saveSettings({ coffee, water, ratio, brewMethod, measurementMode })
   }, [coffee, water, ratio, brewMethod, measurementMode])
 
-  const [calculatedField, setCalculatedField] = useState<"coffee" | "water" | "ratio">("water")
-  const calculatedFieldRef = useRef<"coffee" | "water" | "ratio">("water")
+  const [calculatedField, setCalculatedField] = useState<CalcField>("water")
+  const calculatedFieldRef = useRef<CalcField>("water")
 
   const [flashKeys, setFlashKeys] = useState({ coffee: 0, water: 0, ratio: 0 })
   const [hasEdited, setHasEdited] = useState(false)
   const hasEditedRef = useRef(false)
-  const [lockedField, setLockedField] = useState<"coffee" | "water" | "ratio" | null>(null)
+  const [lockedField, setLockedField] = useState<CalcField | null>(null)
 
-  const setCalculated = (field: "coffee" | "water" | "ratio") => {
+  const setCalculated = (field: CalcField) => {
     const isFirstEdit = !hasEditedRef.current
     if (isFirstEdit) {
       hasEditedRef.current = true
@@ -96,14 +94,14 @@ export function Calculator() {
     setCalculatedField(field)
   }
 
-  const toggleLock = (field: "coffee" | "water" | "ratio") => {
+  const toggleLock = (field: CalcField) => {
     setLockedField((prev) => (prev === field ? null : field))
   }
 
-  const currentFieldRef = useRef<FieldType>("ratio")
-  const previousFieldRef = useRef<FieldType>("ratio")
+  const currentFieldRef = useRef<CalcField>("ratio")
+  const previousFieldRef = useRef<CalcField>("ratio")
 
-  const updateFieldTracking = (field: FieldType) => {
+  const updateFieldTracking = (field: CalcField) => {
     if (currentFieldRef.current !== field) {
       previousFieldRef.current = currentFieldRef.current
       currentFieldRef.current = field
@@ -180,7 +178,7 @@ export function Calculator() {
       const gplValue = parseFloat(value) || 0
       const newRatio = gramsPerLitreToRatio(gplValue)
       setRatio(newRatio)
-      updateFieldTracking("gpl")
+      updateFieldTracking("ratio")
       const calcField = lockedField
         ? getThirdField("ratio", lockedField)
         : previousFieldRef.current === "water"

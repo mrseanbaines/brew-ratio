@@ -32,6 +32,8 @@ export type BrewMethodConfig = {
   | { preferredMode: "gramsPerLitre"; defaultGramsPerLitre: number }
 )
 
+export type CalcField = "coffee" | "water" | "ratio"
+
 export interface CalculatorState {
   coffee: number
   water: number
