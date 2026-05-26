@@ -3,7 +3,15 @@ import { z } from "zod"
 export const measurementModeSchema = z.enum(["ratio", "gramsPerLitre"])
 export type MeasurementMode = z.infer<typeof measurementModeSchema>
 
-export const brewMethodSchema = z.enum(["pourover", "frenchPress", "aeropress", "espresso", "coldBrew", "custom"])
+export const brewMethodSchema = z.enum([
+  "aeropress",
+  "coldBrew",
+  "cupping",
+  "custom",
+  "espresso",
+  "frenchPress",
+  "pourover",
+])
 export type BrewMethod = z.infer<typeof brewMethodSchema>
 
 export const storedSettingsSchema = z.object({
@@ -15,14 +23,14 @@ export const storedSettingsSchema = z.object({
 })
 export type StoredSettings = z.infer<typeof storedSettingsSchema>
 
-export interface BrewMethodConfig {
+export type BrewMethodConfig = {
   id: BrewMethod
   name: string
   defaultCoffee: number
-  defaultRatio: number
-  ratioRange: [number, number]
-  preferredMode: MeasurementMode
-}
+} & (
+  | { preferredMode: "ratio"; defaultRatio: number }
+  | { preferredMode: "gramsPerLitre"; defaultGramsPerLitre: number }
+)
 
 export interface CalculatorState {
   coffee: number

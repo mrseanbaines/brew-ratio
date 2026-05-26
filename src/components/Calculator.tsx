@@ -27,6 +27,12 @@ type FieldType = "coffee" | "water" | "ratio" | "gpl"
 
 const defaultMethod = BREW_METHODS.custom
 
+function getDefaultRatio(config: (typeof BREW_METHODS)[keyof typeof BREW_METHODS]): number {
+  return config.preferredMode === "gramsPerLitre"
+    ? gramsPerLitreToRatio(config.defaultGramsPerLitre)
+    : config.defaultRatio
+}
+
 export function Calculator() {
   const [coffee, setCoffee] = useState(() => {
     const stored = loadSettings()
@@ -35,12 +41,12 @@ export function Calculator() {
 
   const [ratio, setRatio] = useState(() => {
     const stored = loadSettings()
-    return stored?.ratio ?? defaultMethod.defaultRatio
+    return stored?.ratio ?? getDefaultRatio(defaultMethod)
   })
 
   const [water, setWater] = useState(() => {
     const stored = loadSettings()
-    return stored?.water ?? calculateWater(defaultMethod.defaultCoffee, defaultMethod.defaultRatio)
+    return stored?.water ?? calculateWater(defaultMethod.defaultCoffee, getDefaultRatio(defaultMethod))
   })
 
   const [brewMethod, setBrewMethod] = useState<BrewMethod>(() => {
@@ -131,8 +137,10 @@ export function Calculator() {
     setBrewMethod(value)
     const config = BREW_METHODS[value]
     setCoffee(config.defaultCoffee)
-    setRatio(config.defaultRatio)
-    setWater(calculateWater(config.defaultCoffee, config.defaultRatio))
+    const newRatio =
+      config.preferredMode === "gramsPerLitre" ? gramsPerLitreToRatio(config.defaultGramsPerLitre) : config.defaultRatio
+    setRatio(newRatio)
+    setWater(calculateWater(config.defaultCoffee, newRatio))
     setMeasurementMode(config.preferredMode)
   }, [])
 
