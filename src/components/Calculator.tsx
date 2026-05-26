@@ -285,7 +285,7 @@ export function Calculator() {
                   </InputGroup>
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "coffee" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 transition-opacity ${hasEdited && calculatedField === "coffee" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
@@ -313,7 +313,7 @@ export function Calculator() {
                   </InputGroup>
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "water" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 transition-opacity ${hasEdited && calculatedField === "water" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
@@ -363,7 +363,7 @@ export function Calculator() {
                   )}
 
                   <Sparkles
-                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 text-purple-400 transition-opacity ${hasEdited && calculatedField === "ratio" ? "opacity-100" : "opacity-0"}`}
+                    className={`absolute top-1/2 left-full ml-2 size-3.5 -translate-y-1/2 transition-opacity ${hasEdited && calculatedField === "ratio" ? "opacity-100" : "opacity-0"}`}
                   />
                 </div>
 
